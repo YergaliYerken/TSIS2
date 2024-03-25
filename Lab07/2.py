@@ -1,49 +1,50 @@
 import pygame
+import os
 
 pygame.init()
-screen = pygame.display.set_mode((333, 333))
-pygame.display.set_caption("Music")
-done = False
 
-pygame.mixer.music.load("1.mp3")
-pygame.mixer.music.play(0)
+# Set up the Pygame window (not needed for a music player, but for event handling)
+screen = pygame.display.set_mode((200, 200))
+pygame.display.set_caption("Music Player")
 
-Pause = False
-Next = False
-Previous = False
-current_track = 1
+# Load music files into a list
+music_files = ["music1.mp3.wav", "music2.mp3.wav", "music3.mp3.wav"]
+current_track = 0
 
-while not done:
+def play_music():
+    pygame.mixer.music.load(music_files[current_track])
+    pygame.mixer.music.play()
+
+def stop_music():
+    pygame.mixer.music.stop()
+
+def next_track():
+    global current_track
+    current_track = (current_track + 1) % len(music_files)
+    play_music()
+
+def previous_track():
+    global current_track
+    current_track = (current_track - 1) % len(music_files)
+    play_music()
+
+# Main event loop
+running = True
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
+            running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                Pause = not Pause
-                if Pause:
-                    pygame.mixer.music.pause()
+                if pygame.mixer.music.get_busy():
+                    stop_music()
                 else:
-                    pygame.mixer.music.unpause()
+                    play_music()
+            elif event.key == pygame.K_RIGHT:
+                next_track()
+            elif event.key == pygame.K_LEFT:
+                previous_track()
+            elif event.key == pygame.K_ESCAPE:  # Добавлено условие для выхода по нажатию клавиши Escape
+                running = False
 
-            elif event.key == pygame.K_6:
-                Next = True
-                
-            elif event.key == pygame.K_4:
-                Previous = True
-
-    if Next:
-        pygame.mixer.music.stop()
-        current_track += 1
-        if current_track > 3:
-            current_track = 1
-        pygame.mixer.music.load(f"{current_track}.mp3")
-        pygame.mixer.music.play(0)
-        Next = False
-    elif Previous:
-        pygame.mixer.music.stop()
-        current_track -= 1
-        if current_track < 1:
-            current_track = 3
-        pygame.mixer.music.load(f"{current_track}.mp3")
-        pygame.mixer.music.play(0)
-        Previous = False
+    # Add additional logic here if needed
